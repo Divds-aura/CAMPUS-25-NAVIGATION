@@ -216,39 +216,34 @@ unordered_map<string, vector<pair<string, int>>> adj = {
 
 
 void shortestPath(string source, string destination) {
-    if (adj.find(source) == adj.end() || adj.find(destination) == adj.end()) {
+    if (adj.find(source) == adj.end() ||
+        adj.find(destination) == adj.end()) {
         cout << "Invalid source or destination!" << endl;
         return;
     }
 
     unordered_map<string, int> dist;
     unordered_map<string, string> parent;
-    unordered_map<string, bool> visited;
+
     int INF = 1000000000;
 
     for (auto x : adj) {
         dist[x.first] = INF;
-        visited[x.first] = false;
     }
 
+    priority_queue<
+        pair<int, string>,
+        vector<pair<int, string>>,
+        greater<pair<int, string>>
+    > pq;
+
     dist[source] = 0;
+    pq.push({0, source});
 
-    for (int i = 0; i < (int)adj.size(); i++) {
-        string u = "";
-        int minDist = INF;
-
-        for (auto x : adj) {
-            if (visited[x.first] == false && dist[x.first] < minDist) {
-                minDist = dist[x.first];
-                u = x.first;
-            }
-        }
-
-        if (u == "") {
-            break;
-        }
-
-        visited[u] = true;
+    while (!pq.empty()) {
+        int d = pq.top().first;
+        string u = pq.top().second;
+        pq.pop();
 
         for (auto edge : adj[u]) {
             string v = edge.first;
@@ -257,6 +252,8 @@ void shortestPath(string source, string destination) {
             if (dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 parent[v] = u;
+
+                pq.push({dist[v], v});
             }
         }
     }
@@ -271,12 +268,15 @@ void shortestPath(string source, string destination) {
 
     while (node != source) {
         path.push_back(node);
+
         if (parent.find(node) == parent.end()) {
             cout << "No path found." << endl;
             return;
         }
+
         node = parent[node];
     }
+
     path.push_back(source);
     reverse(path.begin(), path.end());
 
@@ -285,10 +285,12 @@ void shortestPath(string source, string destination) {
 
     for (int i = 0; i < (int)path.size(); i++) {
         cout << path[i];
+
         if (i != (int)path.size() - 1) {
             cout << " -> ";
         }
     }
+
     cout << endl;
 }
 
